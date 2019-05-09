@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<meta charset = "UTF-8">
+<link href = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel = "stylesheet">
+<link href = "style.css" rel = "stylesheet">
+
+<style>
+    .small-video-mask {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+        display: inline-block;
+        position: relative;
+    }
+
+    .small-video {
+        position: absolute;
+
+        top: -50px;
+        left: -50px;
+
+        height: 180px;
+        width: 180px;
+        box-shadow: $material-shadow-1;
+        z-index: 0;
+    }
+</style>
+
+<div class = "container-fluid">
+	<div class = "row">
+		<div class = "col-xs-12 col-xs-offset-0 col-md-8 col-md-offset-2">
+			<br>
+			<br>
+
+            <div id="headIndicator" style="position: absolute; top: 10px; left: 10px; width: 20px; height: 20px; background: #ff0000; border-radius: 50%; display: none;">
+            </div>
+
+			<!-- Video Panel -->
+			<div class = "video-panel panel panel-default" style = "height: 500px">
+				<video id = "remoteVideo" autoplay></video>
+				<div class="small-video-mask">
+                    <video id="hostVideo" class="small-video" autoplay muted></video>
+                </div>
+			</div>
+
+			<!-- Controls -->
+			<input id = "roomNumber" class = "form-control" placeholder = "Room Name" value = "thisroom">
+			<br>
+			<button id = "connectButton" class = "btn btn-primary btn-lg">Connect</button>
+			<button id = "disconnectButton" class = "btn btn-danger btn-lg">Disconnect</button>
+			<br>
+            <canvas id="headTrackingCanvas">
+            </canvas>
+		</div>
+	</div>
+</div>
+
+<script src = "https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.min.js"></script>
+<script src = "../dist/Videre.js"></script>
+
+<script>
+    
+    var hostVideo = document.getElementById('hostVideo')
+    var remoteVideo = document.getElementById('remoteVideo')
+    var headIndicator = document.getElementById('headIndicator')
+    var headTrackingCanvas = document.getElementById('headTrackingCanvas')
+
+    var videre = new Videre.default({
+        signallerURL: location.protocol + '//' + document.domain + ':1111/echo',
+        localVideoElement: hostVideo,
+        remoteVideoElement: remoteVideo,
+        headTrackingCanvas: headTrackingCanvas,
+        initComplete: init,
+        headTrackerStatusChanged: headChanged
+    })
+
+    videre.onLocalStream = function() {
+        console.log('received stream')
+        videre.localVideoElement.muted = true
+    }
+
+    videre.speaking = function() {
+        console.log('speaking')
+    }
+
+    videre.stoppedSpeaking = function() {
+        console.log('stopped speaking')
+    }
+
+    videre.onVideoError = function() {
+        console.error('Error getting video')
+    }
+
+    videre.onAudioError = function() {
+        console.error('Error getting audio')
+    }
+
+    function init() {
+        console.log('Videre initiated')
+    }
+
+    function headChanged(status) {
+        console.log(status)
+        if (status == 'found') {
+            headIndicator.style.display = 'block'
+        } else {
+            headIndicator.style.display = 'none'
+        }
+    }
+
+    $('#connectButton').click(function() {
+        videre.connect($('#roomNumber').val())
+    })
+
+    $('#disconnectButton').click(function() {
+        videre.disconnect()
+    })
+
+</script>

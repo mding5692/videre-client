@@ -1,0 +1,17 @@
+
+.video-panel {
+	position: relative;
+}
+
+#remoteVideo {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+}
+
+#hostVideo {
+	position: absolute;
+	height: 160px;
+	bottom: 0px;
+	right: 0px;
+}
